@@ -1,0 +1,24 @@
+# 第三方参考资料（pi 源码等，仅本地参考，不纳入本项目）
+reference/
+
+# 敏感配置（含 API key，绝不提交）
+.env
+.env.*
+!.env.example
+
+# 依赖
+node_modules/
+
+# 构建产物
+dist/
+build/
+.next/
+*.tsbuildinfo
+
+# 日志
+*.log
+npm-debug.log*
+
+# 系统
+.DS_Store
+Thumbs.db
