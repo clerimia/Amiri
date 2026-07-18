@@ -1,11 +1,11 @@
 /**
- * scripts/lib/embeddings —— Ark 豆包 embedding 适配器
+ * ark-embeddings -- Ark 豆包 embedding 适配器
  *
- * 见 docs/rag-principles.md §2.1：Ark 豆包 `doubao-embedding-vision`（1024 维），
+ * 见 docs/rag-principles.md §2.1：Ark 豆包 `doubao-embedding-vision`（2048 维），
  * 走 OpenAI 兼容接口。langchain.ts 的 OpenAIEmbeddings 支持自定义 baseURL + apiKey。
  *
- * 之所以单独抽出：两个 ingest 脚本都要用，也给未来检索链路复用；env 校验
- * 汇总 ticket（#9）落地后可以从这里替换成 zod 校验版本。
+ * 之所以放在 lib/：摄入脚本（#7）和检索链路（#8）都要用，是跨环节共享薄封装。
+ * env 校验汇总 ticket（#9）落地后可以从这里替换成 zod 校验版本。
  */
 
 import { OpenAIEmbeddings } from "@langchain/openai";

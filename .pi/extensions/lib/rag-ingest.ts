@@ -232,7 +232,7 @@ export async function rebuildCollection(
   await saveDict(dict, opts.dictPath);
 
   // 生成 dense embedding；embeddings 内部走 Ark，`embedDocuments` 会按 batchSize
-  // 自动分批 + maxConcurrency=1 串行请求（见 scripts/lib/embeddings.ts）
+  // 自动分批 + maxConcurrency=1 串行请求（见 lib/ark-embeddings.ts）
   const denseVectors = await embeddings.embedDocuments(docs.map(d => d.pageContent));
 
   // upsert：手动组 point，双向量 + payload

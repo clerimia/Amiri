@@ -29,3 +29,6 @@ Blog/
 
 # Claude Code 本地工作目录（含 worktrees、缓存等）
 .claude/
+
+# pi-subagents 运行时 artifacts（子 agent transcript/output 缓存）
+.pi-subagents/

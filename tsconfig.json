@@ -18,9 +18,9 @@
     }
   },
   "include": [
-    ".pi/**/*.ts",
+    ".pi/extensions/lib/**/*.ts",
     "scripts/**/*.ts",
     "tests/**/*.ts"
   ],
-  "exclude": ["node_modules", "reference", "Blog"]
+  "exclude": ["node_modules", "reference", "Blog", ".pi/extensions/search-rag.ts"]
 }

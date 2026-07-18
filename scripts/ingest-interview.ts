@@ -8,7 +8,7 @@
 import "dotenv/config";
 import path from "node:path";
 import { loadAndSplit, rebuildCollection } from "../.pi/extensions/lib/rag-ingest.js";
-import { createArkEmbeddings, ARK_EMBEDDING_DIM } from "./lib/embeddings.js";
+import { createArkEmbeddings, ARK_EMBEDDING_DIM } from "../.pi/extensions/lib/ark-embeddings.js";
 
 const DEFAULT_BLOG_POSTS_DIR = "./Blog/source/_posts";
 const DEFAULT_KNOWLEDGES_DIR = "./knowledges";
