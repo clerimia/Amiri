@@ -22,3 +22,10 @@ npm-debug.log*
 # 系统
 .DS_Store
 Thumbs.db
+*.swp
+
+# Blog（独立项目，路径走 BLOG_POSTS_DIR）
+Blog/
+
+# Claude Code 本地工作目录（含 worktrees、缓存等）
+.claude/
