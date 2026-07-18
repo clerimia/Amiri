@@ -15,8 +15,8 @@ import path from "node:path";
 import { Document } from "@langchain/core/documents";
 import type { EmbeddingsInterface } from "@langchain/core/embeddings";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
-import { QdrantVectorStore } from "@langchain/community/vectorstores/qdrant";
 import { QdrantClient } from "@qdrant/js-client-rest";
+import { buildSparseVectors, saveDict, type SparseDict } from "./rag-sparse.js";
 
 /**
  * D-1：批注预处理。
@@ -185,22 +185,29 @@ export async function loadAndSplit(cfg: IngestConfig): Promise<Document[]> {
 }
 
 /**
- * 全量重建 Qdrant collection：drop + create + embed + upsert。
+ * 全量重建 Qdrant collection：drop + create（named dense + sparse）+ embed + upsert。
  *
- * 非增量 upsert（§1.1 决策）：先 delete 现有 collection（若存在），再
- * QdrantVectorStore.fromDocuments 走 langchain 建集合 + upsert 一条龙。
+ * 非增量 upsert（§1.1 决策）：先 delete 现有 collection（若存在），再自建 schema——
+ * schema 从原来的单 vector 改成 **named dense + sparse**（对齐 m2 决策，见 #13/#14）：
+ *   - vectors:        `{ dense: { size, distance: Cosine } }`
+ *   - sparse_vectors: `{ sparse: {} }`
+ * 因为 named vector + sparse 一起用时 `QdrantVectorStore.fromDocuments` 不支持
+ * （它只吃默认单向量 schema），这里手动走 create + embed + upsert 流程。
+ *
+ * payload 命名对齐 langchain `QdrantVectorStore` 默认：
+ *   - `content`  = doc.pageContent
+ *   - `metadata` = doc.metadata
+ * 让 #8 检索侧继续用 `QdrantVectorStore.fromExistingCollection` 挂载读，字段名不用改。
  *
  * @param docs      待摄入的 chunk
  * @param embeddings Ark 豆包 embedding 实例（走 OpenAI 兼容接口）
- * @param url       Qdrant HTTP 端点，如 http://localhost:6333
- * @param collectionName collection 名
- * @param vectorSize embedding 维度（豆包默认 1024）
+ * @param opts.dictPath sparse 词典落盘路径（本 collection 独立字典 JSON）
  */
 export async function rebuildCollection(
   docs: Document[],
   embeddings: EmbeddingsInterface,
-  opts: { url: string; collectionName: string; vectorSize: number }
-): Promise<{ points: number }> {
+  opts: { url: string; collectionName: string; vectorSize: number; dictPath: string }
+): Promise<{ points: number; dict: SparseDict }> {
   const client = new QdrantClient({ url: opts.url });
 
   // drop
@@ -210,16 +217,45 @@ export async function rebuildCollection(
     // 不存在也没关系，往下走
   }
 
-  // create + embed + upsert，一条龙
-  await QdrantVectorStore.fromDocuments(docs, embeddings, {
-    client,
-    collectionName: opts.collectionName,
-    collectionConfig: {
-      vectors: { size: opts.vectorSize, distance: "Cosine" },
+  // 建 collection：named dense + sparse
+  await client.createCollection(opts.collectionName, {
+    vectors: {
+      dense: { size: opts.vectorSize, distance: "Cosine" },
+    },
+    sparse_vectors: {
+      sparse: {},
     },
   });
 
+  // 建 sparse 词典 + doc-side sparse 向量
+  const { dict, sparses } = buildSparseVectors(docs);
+  await saveDict(dict, opts.dictPath);
+
+  // 生成 dense embedding；embeddings 内部走 Ark，`embedDocuments` 会按 batchSize
+  // 自动分批 + maxConcurrency=1 串行请求（见 scripts/lib/embeddings.ts）
+  const denseVectors = await embeddings.embedDocuments(docs.map(d => d.pageContent));
+
+  // upsert：手动组 point，双向量 + payload
+  // 分批 upsert：一次全推 139×2048 float 大约 1MB+，Qdrant 单请求默认 32MB 上限，
+  // 但保险起见按 64 分批（同样是给未来更大语料兜底）
+  const BATCH = 64;
+  for (let i = 0; i < docs.length; i += BATCH) {
+    const slice = docs.slice(i, i + BATCH);
+    const points = slice.map((d, k) => ({
+      id: i + k,
+      vector: {
+        dense: denseVectors[i + k],
+        sparse: sparses[i + k],
+      },
+      payload: {
+        content: d.pageContent,
+        metadata: d.metadata,
+      },
+    }));
+    await client.upsert(opts.collectionName, { points, wait: true });
+  }
+
   // 校验 count
   const info = await client.getCollection(opts.collectionName);
-  return { points: Number(info.points_count ?? docs.length) };
+  return { points: Number(info.points_count ?? docs.length), dict };
 }

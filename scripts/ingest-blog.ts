@@ -17,14 +17,17 @@ import { createArkEmbeddings, ARK_EMBEDDING_DIM } from "./lib/embeddings.js";
 const DEFAULT_BLOG_POSTS_DIR = "./Blog/source/_posts";
 const DEFAULT_QDRANT_URL = "http://localhost:6333";
 const COLLECTION = "blog";
+const DICT_PATH = "./scripts/lib/sparse-dict/blog.json";
 
 async function main() {
   const blogDir = path.resolve(process.env.BLOG_POSTS_DIR ?? DEFAULT_BLOG_POSTS_DIR);
   const qdrantUrl = process.env.QDRANT_URL ?? DEFAULT_QDRANT_URL;
+  const dictPath = path.resolve(DICT_PATH);
 
   console.log(`[ingest-blog] blog dir      = ${blogDir}`);
   console.log(`[ingest-blog] qdrant url    = ${qdrantUrl}`);
   console.log(`[ingest-blog] collection    = ${COLLECTION}`);
+  console.log(`[ingest-blog] sparse dict   = ${dictPath}`);
 
   console.log(`[ingest-blog] loading + splitting...`);
   const docs = await loadAndSplit({
@@ -40,12 +43,15 @@ async function main() {
 
   console.log(`[ingest-blog] embedding + upserting to Qdrant...`);
   const embeddings = createArkEmbeddings();
-  const { points } = await rebuildCollection(docs, embeddings, {
+  const { points, dict } = await rebuildCollection(docs, embeddings, {
     url: qdrantUrl,
     collectionName: COLLECTION,
     vectorSize: ARK_EMBEDDING_DIM,
+    dictPath,
   });
-  console.log(`[ingest-blog] done. points_count=${points}`);
+  console.log(
+    `[ingest-blog] done. points_count=${points} sparse_terms=${Object.keys(dict.terms).length} avgdl=${dict.avgdl.toFixed(1)}`
+  );
 }
 
 main().catch(err => {
