@@ -1,0 +1,17 @@
+# 开发态依赖编排。Amiri 本身不容器化，仅 Qdrant 走 compose。
+# 生产态 Qdrant 编排见 #5（frp + Nginx 部署链路）细化，本文件仅管开发态。
+
+services:
+  qdrant:
+    image: qdrant/qdrant:v1.11.3
+    container_name: amiri-qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"  # HTTP / REST，对齐 QDRANT_URL=http://localhost:6333
+      - "6334:6334"  # gRPC，langchain.ts / 客户端未来切 gRPC 时可用
+    volumes:
+      - qdrant_storage:/qdrant/storage
+
+volumes:
+  qdrant_storage:
+    name: amiri-qdrant-storage
