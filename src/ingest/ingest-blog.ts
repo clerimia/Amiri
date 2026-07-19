@@ -1,5 +1,5 @@
 /**
- * scripts/ingest-blog.ts —— 博客 tool 摄入脚本
+ * src/ingest/ingest-blog.ts -- 博客 tool 摄入脚本
  *
  * 全量重建 `blog` collection。素材源：BLOG_POSTS_DIR（默认 ./Blog/source/_posts）。
  * 详细规格见 docs/rag-principles.md §1（摄入链路）。
@@ -11,15 +11,17 @@
 
 import "dotenv/config";
 import path from "node:path";
-import { loadAndSplit, rebuildCollection } from "../.pi/extensions/lib/rag-ingest.js";
-import { createArkEmbeddings, ARK_EMBEDDING_DIM } from "../.pi/extensions/lib/ark-embeddings.js";
+import { loadAndSplit, rebuildCollection } from "../extensions/lib/rag-ingest.js";
+import { createArkEmbeddings, ARK_EMBEDDING_DIM } from "../extensions/lib/ark-embeddings.js";
+import { validateEnv } from "../extensions/lib/env.js";
 
 const DEFAULT_BLOG_POSTS_DIR = "./Blog/source/_posts";
 const DEFAULT_QDRANT_URL = "http://localhost:6333";
 const COLLECTION = "blog";
-const DICT_PATH = "./scripts/lib/sparse-dict/blog.json";
+const DICT_PATH = "./src/extensions/lib/sparse-dict/blog.json";
 
 async function main() {
+  validateEnv();
   const blogDir = path.resolve(process.env.BLOG_POSTS_DIR ?? DEFAULT_BLOG_POSTS_DIR);
   const qdrantUrl = process.env.QDRANT_URL ?? DEFAULT_QDRANT_URL;
   const dictPath = path.resolve(DICT_PATH);

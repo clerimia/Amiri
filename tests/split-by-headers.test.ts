@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { splitByHeaders } from "../.pi/extensions/lib/rag-ingest.js";
+import { splitByHeaders } from "../src/extensions/lib/rag-ingest.js";
 
 describe("splitByHeaders", () => {
   it("按 ##/### 切段，section 保存完整标题路径", () => {

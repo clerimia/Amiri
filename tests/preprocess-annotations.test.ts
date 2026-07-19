@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { preprocessAnnotations } from "../.pi/extensions/lib/rag-ingest.js";
+import { preprocessAnnotations } from "../src/extensions/lib/rag-ingest.js";
 
 describe("preprocessAnnotations", () => {
   it("将单条 clerimia 批注转成粗体行内标记", () => {

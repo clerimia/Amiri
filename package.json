@@ -5,8 +5,8 @@
   "description": "Amiri —— 以 Pi 为 runtime 基座的个人 Agent（TypeScript）",
   "type": "module",
   "scripts": {
-    "ingest:blog": "tsx scripts/ingest-blog.ts",
-    "ingest:interview": "tsx scripts/ingest-interview.ts",
+    "ingest:blog": "tsx src/ingest/ingest-blog.ts",
+    "ingest:interview": "tsx src/ingest/ingest-interview.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },

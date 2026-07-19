@@ -14,7 +14,7 @@ import {
   tokenize,
   buildSparseVectors,
   embedQuerySparse,
-} from "../.pi/extensions/lib/rag-sparse.js";
+} from "../src/extensions/lib/rag-sparse.js";
 
 describe("tokenize", () => {
   it("对纯中文用 jieba 精确模式切分", () => {

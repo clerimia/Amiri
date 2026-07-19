@@ -18,11 +18,12 @@ import { Document } from "@langchain/core/documents";
 import { Agent, fetch as undiciFetch } from "undici";
 import { embedQuerySparse, type SparseDict, type SparseVector } from "./rag-sparse.js";
 import { createArkEmbeddings } from "./ark-embeddings.js";
+import { validateEnv } from "./env.js";
 
 /** collection 名与词典/检索参数的映射。两个 collection 共享一套检索参数（§2.5/§4.3）。 */
 const COLLECTIONS = {
-  blog: { dictPath: "scripts/lib/sparse-dict/blog.json" },
-  interview: { dictPath: "scripts/lib/sparse-dict/interview.json" },
+  blog: { dictPath: "src/extensions/lib/sparse-dict/blog.json" },
+  interview: { dictPath: "src/extensions/lib/sparse-dict/interview.json" },
 } as const;
 
 export type CollectionName = keyof typeof COLLECTIONS;
@@ -114,6 +115,7 @@ export async function retrieve(
   collection: CollectionName,
   query: string
 ): Promise<Document[]> {
+  validateEnv();
   const denseVec = await embedQueryDense(query);
   const sparseVec = buildSparseQuery(collection, query);
 
