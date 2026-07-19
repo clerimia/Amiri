@@ -32,3 +32,6 @@ Blog/
 
 # pi-subagents 运行时 artifacts（子 agent transcript/output 缓存）
 .pi-subagents/
+
+# teach 教学工作区（RAG 学习材料、课程、学习记录，仅本地）
+learning/

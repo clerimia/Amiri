@@ -1,0 +1,15 @@
+﻿id,category,collection,query,expected,should_not,intent,agent_answer,retrieval_hit,human_score
+1,直查型,blog,git 的对象模型有哪几种,git模型.md,,测 dense 能否精准命中含明确术语的文档,,,3
+2,直查型,blog,chat completions API 的消息角色有哪些,chat completions API 协议.md,,测命中含文档标题关键词的查询,,,
+3,直查型,blog,Pi Agent 的 AgentLoop 是怎么工作的,Pi Agent 设计思路.md,,测命中含核心概念名的文档,,,
+4,语义型,blog,Git 怎么撤销已经提交的修改,git模型.md,HashMap.md,测换说法后语义泛化能否命中 revert/reset 章节（HashMap 是空壳，不该误召回）,,,
+5,语义型,blog,代码提交后想退回上一个版本该用什么命令,git模型.md,,测自然语言描述场景能否命中 git 回滚章节,,,
+6,语义型,blog,pi 启动的时候是怎么把上下文组装好发给大模型的,Pi Agent Session 上下文初始化.md,Matt Pocock.md,测自然语言能否命中源码解读文档（Matt Pocock 是工作流，不该误召回）,,,
+7,跨文档型,blog,pi-agent 这个项目分了哪几个包、各自做什么,Pi Agent 包架构与领域对象.md,,测能否命中包架构文档,,,
+8,跨文档型,blog,大模型 API 调用时消息的顺序有什么约束,chat completions API 协议.md,,测能否从 API 协议文档命中顺序约束内容,,,
+9,负例型,blog,K8s 的部署流程是怎么样的,,git模型.md;HashMap.md,测负例是否召回空（语料无 K8s，top-5 应全空或不相关）,,,
+10,负例型,blog,React 的 Fiber 架构原理,,Abort.md,测负例是否召回空（语料无 React，Abort 仅为图、文字极少，不该误召回）,,,
+11,简历型,interview,我的项目里用了什么数据库技术,关于我.md,,测 interview collection 能否命中简历里的项目经历,,,
+12,简历型,interview,RookieDB 这个项目你做了哪些模块,关于我.md,,测命中简历具体项目段落,,,
+13,简历型,interview,你做过和 RAG 相关的项目吗,关于我.md,,测命中 RAG 校园知识库项目段落,,,
+14,分流型,blog,HashMap 的底层数据结构是什么,HashMap.md,,测 blog 视角的技术原理查询（注：HashMap.md 当前为空壳，预期召回质量差，用于暴露语料缺口）,,,
