@@ -16,7 +16,7 @@ import { Document } from "@langchain/core/documents";
 import type { EmbeddingsInterface } from "@langchain/core/embeddings";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { QdrantClient } from "@qdrant/js-client-rest";
-import { buildSparseVectors, saveDict, type SparseDict } from "./rag-sparse.js";
+import { buildSparseVectors, saveDict, type SparseDict } from "../sparse.js";
 
 /**
  * D-1：批注预处理。

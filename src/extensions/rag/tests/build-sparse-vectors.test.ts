@@ -6,7 +6,7 @@
  *   - 稳定的 IDF（Lucene 变体，log((N-df+0.5)/(df+0.5)+1)）
  *   - 稳定的 doc-side sparse 权重（BM25 k1=1.2, b=0.75）
  *   - indices 单调递增（Qdrant 要求）
- *   - embedQuerySparse 未登录词丢弃、多次出现 tf 累加
+ *   - embedQuerySparse 未登录词丢弃、重复 term 权重固定为 1（对齐主流 BM25 查询侧行为）
  */
 import { describe, it, expect } from "vitest";
 import { Document } from "@langchain/core/documents";
@@ -14,7 +14,7 @@ import {
   tokenize,
   buildSparseVectors,
   embedQuerySparse,
-} from "../src/extensions/lib/rag-sparse.js";
+} from "../lib/sparse.js";
 
 describe("tokenize", () => {
   it("对纯中文用 jieba 精确模式切分", () => {
@@ -135,13 +135,13 @@ describe("embedQuerySparse", () => {
     expect(sv.values).toEqual([]);
   });
 
-  it("登录词按 tf 累加", () => {
+  it("登录词权重固定为 1（重复不计 tf）", () => {
     const sv = embedQuerySparse("缓存 缓存 击穿", dict);
     const idxCache = dict.terms["缓存"].id;
     const idxJi = dict.terms["击穿"].id;
     const cacheVal = sv.values[sv.indices.indexOf(idxCache)];
     const jiVal = sv.values[sv.indices.indexOf(idxJi)];
-    expect(cacheVal).toBe(2);
+    expect(cacheVal).toBe(1);
     expect(jiVal).toBe(1);
   });
 

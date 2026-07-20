@@ -1,28 +1,36 @@
 /**
- * src/ingest/ingest-interview.ts -- 面试 tool 摄入脚本
+ * ingest-interview -- 面试 tool 摄入脚本
  *
- * 全量重建 `interview` collection。素材源：BLOG_POSTS_DIR（含简历 `关于我.md`）
- * + ./knowledges（题库，进 amiri git）。详细规格见 docs/rag-principles.md §1。
+ * 全量重建 `interview` collection。素材源由 .env 显式指定：
+ *   - BLOG_POSTS_DIR（含简历《关于我.md》）
+ *   - KNOWLEDGES_DIR（题库）
+ * 详细规格见 docs/rag-principles.md §1。
  */
 
 import "dotenv/config";
 import path from "node:path";
-import { loadAndSplit, rebuildCollection } from "../extensions/lib/rag-ingest.js";
-import { createArkEmbeddings, ARK_EMBEDDING_DIM } from "../extensions/lib/ark-embeddings.js";
-import { validateEnv } from "../extensions/lib/env.js";
+import { loadAndSplit, rebuildCollection } from "./ingest.js";
+import { createArkEmbeddings, ARK_EMBEDDING_DIM } from "../ark-embeddings.js";
+import { validateEnv } from "../env.js";
+import { dictPathFor } from "../dict-paths.js";
 
-const DEFAULT_BLOG_POSTS_DIR = "./Blog/source/_posts";
-const DEFAULT_KNOWLEDGES_DIR = "./knowledges";
 const DEFAULT_QDRANT_URL = "http://localhost:6333";
 const COLLECTION = "interview";
-const DICT_PATH = "./src/extensions/lib/sparse-dict/interview.json";
 
 async function main() {
   validateEnv();
-  const blogDir = path.resolve(process.env.BLOG_POSTS_DIR ?? DEFAULT_BLOG_POSTS_DIR);
-  const knowledgesDir = path.resolve(DEFAULT_KNOWLEDGES_DIR);
+  const blogPostsDir = process.env.BLOG_POSTS_DIR;
+  const knowledgesDirRaw = process.env.KNOWLEDGES_DIR;
+  const missing: string[] = [];
+  if (!blogPostsDir) missing.push("BLOG_POSTS_DIR");
+  if (!knowledgesDirRaw) missing.push("KNOWLEDGES_DIR");
+  if (missing.length > 0) {
+    throw new Error(`缺少必填环境变量：${missing.join(", ")}。请在 .env 中配置。`);
+  }
+  const blogDir = path.resolve(blogPostsDir!);
+  const knowledgesDir = path.resolve(knowledgesDirRaw!);
   const qdrantUrl = process.env.QDRANT_URL ?? DEFAULT_QDRANT_URL;
-  const dictPath = path.resolve(DICT_PATH);
+  const dictPath = dictPathFor(COLLECTION);
 
   console.log(`[ingest-interview] blog dir       = ${blogDir}`);
   console.log(`[ingest-interview] knowledges dir = ${knowledgesDir}`);

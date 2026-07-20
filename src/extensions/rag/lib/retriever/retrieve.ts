@@ -13,20 +13,15 @@
  */
 
 import { readFileSync } from "node:fs";
-import path from "node:path";
 import { Document } from "@langchain/core/documents";
 import { Agent, fetch as undiciFetch } from "undici";
-import { embedQuerySparse, type SparseDict, type SparseVector } from "./rag-sparse.js";
-import { createArkEmbeddings } from "./ark-embeddings.js";
-import { validateEnv } from "./env.js";
+import { embedQuerySparse, type SparseDict, type SparseVector } from "../sparse.js";
+import { createArkEmbeddings } from "../ark-embeddings.js";
+import { validateEnv } from "../env.js";
+import { dictPathFor } from "../dict-paths.js";
 
-/** collection 名与词典/检索参数的映射。两个 collection 共享一套检索参数（§2.5/§4.3）。 */
-const COLLECTIONS = {
-  blog: { dictPath: "src/extensions/lib/sparse-dict/blog.json" },
-  interview: { dictPath: "src/extensions/lib/sparse-dict/interview.json" },
-} as const;
-
-export type CollectionName = keyof typeof COLLECTIONS;
+/** collection 名。两个 collection 共享一套检索参数（§2.5/§4.3）。 */
+export type CollectionName = "blog" | "interview";
 
 /** 词典进程内缓存：loadDict 读 ~200KB JSON，反复加载浪费。 */
 const dictCache = new Map<CollectionName, SparseDict>();
@@ -34,7 +29,7 @@ const dictCache = new Map<CollectionName, SparseDict>();
 /**
  * lazy 加载某 collection 的 sparse 词典。
  *
- * 路径以进程 cwd（= 项目根，Pi 在项目根启动）为基准。词典是 #14 摄入时落盘的，
+ * 路径解析见 lib/dict-paths.ts，不依赖进程 cwd。词典是 #14 摄入时落盘的，
  * 进 git，运行时只读。
  *
  * 同步读：词典是本地小文件（~200KB），readFileSync 阻塞可接受，且让
@@ -44,7 +39,7 @@ const dictCache = new Map<CollectionName, SparseDict>();
 export function loadDict(collection: CollectionName): SparseDict {
   const cached = dictCache.get(collection);
   if (cached) return cached;
-  const abs = path.resolve(process.cwd(), COLLECTIONS[collection].dictPath);
+  const abs = dictPathFor(collection);
   const dict = JSON.parse(readFileSync(abs, "utf-8")) as SparseDict;
   dictCache.set(collection, dict);
   return dict;

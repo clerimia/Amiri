@@ -2,28 +2,13 @@
   "name": "amiri",
   "version": "0.0.0",
   "private": true,
-  "description": "Amiri —— 以 Pi 为 runtime 基座的个人 Agent（TypeScript）",
+  "description": "Amiri -- 以 Pi 为 runtime 基座的个人 Agent（TypeScript）",
   "type": "module",
   "scripts": {
-    "ingest:blog": "tsx src/ingest/ingest-blog.ts",
-    "ingest:interview": "tsx src/ingest/ingest-interview.ts",
-    "test": "vitest run",
-    "test:watch": "vitest"
-  },
-  "dependencies": {
-    "@langchain/community": "^0.3.0",
-    "@langchain/core": "^0.3.0",
-    "@langchain/openai": "^0.3.0",
-    "@langchain/textsplitters": "^0.1.0",
-    "@node-rs/jieba": "^2.0.1",
-    "@qdrant/js-client-rest": "^1.11.0",
-    "dotenv": "^16.4.5",
-    "undici": "^6.27.0"
-  },
-  "devDependencies": {
-    "@types/node": "^22.0.0",
-    "tsx": "^4.19.0",
-    "typescript": "^5.6.0",
-    "vitest": "^2.1.0"
+    "ingest:blog": "cd src/extensions/rag && npm run ingest:blog",
+    "ingest:interview": "cd src/extensions/rag && npm run ingest:interview",
+    "test": "cd src/extensions/rag && npm run test",
+    "test:watch": "cd src/extensions/rag && npm run test:watch",
+    "typecheck": "cd src/extensions/rag && npm run typecheck"
   }
 }

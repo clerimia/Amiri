@@ -2,16 +2,16 @@
 # qa-e2e.sh -- 批量 dogfood：读 cases.csv 的 query，逐条 pi -p 跑 agent，
 # 完整回答写到 out/<id>.txt，并在 out/cases-e2e.csv 的 agent_answer 列填截断版 + txt 链接。
 #
-# 用法：bash tests/qa/qa-e2e.sh
-# 依赖：pi 在 PATH 里、cases.csv 在 tests/qa/cases.csv
+# 用法：bash src/extensions/rag/tests/qa/qa-e2e.sh
+# 依赖：pi 在 PATH 里、cases.csv 在同目录
 #
 # 注意：每条 query 会真实调用 pi（耗 token、耗时）。建议先小批试跑。
 
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-CASES="$ROOT/tests/qa/cases.csv"
-OUTDIR="$ROOT/tests/qa/out"
+QA_DIR="$(cd "$(dirname "$0")" && pwd)"
+CASES="$QA_DIR/cases.csv"
+OUTDIR="$QA_DIR/out"
 E2E_CSV="$OUTDIR/cases-e2e.csv"
 mkdir -p "$OUTDIR"
 

@@ -1,0 +1,11 @@
+# 敏感配置（含 API key，绝不提交）
+.env
+.env.*
+!.env.example
+
+# 依赖
+node_modules/
+
+# QA bench 产物（cases-bench.csv 已作为 baseline 提交，其余运行产物忽略）
+tests/qa/out/*.txt
+tests/qa/out/cases-e2e.csv

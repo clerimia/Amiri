@@ -159,23 +159,26 @@ export function buildSparseVectors(
  * 把查询串按已有字典切成 sparse 向量。
  *
  * 未登录 term 直接丢弃（正确性：没在语料出现过的词 df=0、IDF 也没意义，Qdrant 侧
- * 也匹配不到）。query-side 权重用 raw tf（不做 BM25 归一化）——doc-side 已经把
- * IDF 吃进权重了，query 只需要标识"这个 term 出现了几次"作为线性组合系数。
+ * 也匹配不到）。query-side 每个 term 权重固定为 1（不按出现次数累加）--对齐
+ * Lucene/ES 等主流 BM25 实现的查询侧行为：query 通常很短，重复一个词往往是
+ * 口误/强调而非更强的语义信号，按 tf 累加会让"git git 撤销"比"git 撤销"权重高，
+ * 不合理。doc-side 的 IDF + BM25 权重已足够承载相关性，query 只需标识"要查
+ * 这几个 term"作为线性组合系数。
  *
  * 本函数是检索侧 (#8) 的钩子，本 ticket 落地但不在 ingest 路径上用。
  */
 export function embedQuerySparse(query: string, dict: SparseDict): SparseVector {
   const toks = tokenize(query);
-  const tf = new Map<number, number>();
+  const seen = new Set<number>();
   for (const t of toks) {
     const meta = dict.terms[t];
     if (!meta) continue;
-    tf.set(meta.id, (tf.get(meta.id) ?? 0) + 1);
+    seen.add(meta.id);
   }
-  const entries = Array.from(tf.entries()).sort((a, b) => a[0] - b[0]);
+  const entries = Array.from(seen).sort((a, b) => a - b);
   return {
-    indices: entries.map(e => e[0]),
-    values: entries.map(e => e[1]),
+    indices: entries,
+    values: entries.map(() => 1),
   };
 }
 

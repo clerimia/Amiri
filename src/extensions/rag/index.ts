@@ -5,13 +5,13 @@
  * #8 grilling 决定：不做 search_blog / search_interview 两个 tool，合并为一个参数化 tool。
  *
  * 这里只做 tool 注册 + D-3 结果转换（Document[] -> {content: markdown, details}）。
- * 检索实现在 lib/rag-retrieve.ts。
+ * 检索实现在 lib/retriever/retrieve.ts。
  */
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 import { StringEnum } from "@earendil-works/pi-ai";
-import { retrieve, type CollectionName } from "./lib/rag-retrieve.js";
+import { retrieve, type CollectionName } from "./lib/retriever/retrieve.js";
 import type { Document } from "@langchain/core/documents";
 
 /**
@@ -63,7 +63,7 @@ export default function (pi: ExtensionAPI) {
       collection: StringEnum(["blog", "interview"] as const, {
         description: "搜哪个知识库：blog=博客文章，interview=面试题库与简历素材",
       }),
-      query: Type.String({ description: "自然语言查询；会做语义检索，不必精确匹配关键词" }),
+      query: Type.String({ description: "自然语言查询；会做语义和精确双路检索" }),
     }),
 
     async execute(_toolCallId, params, _signal, _onUpdate, _ctx) {

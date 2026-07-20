@@ -1,0 +1,12 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "composite": false
+  },
+  "include": [
+    "index.ts",
+    "lib/**/*.ts",
+    "tests/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}

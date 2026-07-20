@@ -1,30 +1,31 @@
 /**
- * src/ingest/ingest-blog.ts -- 博客 tool 摄入脚本
+ * ingest-blog -- 博客 tool 摄入脚本
  *
- * 全量重建 `blog` collection。素材源：BLOG_POSTS_DIR（默认 ./Blog/source/_posts）。
+ * 全量重建 `blog` collection。素材源由 BLOG_POSTS_DIR（.env）显式指定，无默认。
  * 详细规格见 docs/rag-principles.md §1（摄入链路）。
  *
- * 用法：
- *   npm run ingest:blog                       # 用默认 BLOG_POSTS_DIR
- *   BLOG_POSTS_DIR=/path/to/posts npm run ingest:blog
+ * 用法：npm run ingest:blog（在 src/extensions/rag 下跑，读该目录 .env）
  */
 
 import "dotenv/config";
 import path from "node:path";
-import { loadAndSplit, rebuildCollection } from "../extensions/lib/rag-ingest.js";
-import { createArkEmbeddings, ARK_EMBEDDING_DIM } from "../extensions/lib/ark-embeddings.js";
-import { validateEnv } from "../extensions/lib/env.js";
+import { loadAndSplit, rebuildCollection } from "./ingest.js";
+import { createArkEmbeddings, ARK_EMBEDDING_DIM } from "../ark-embeddings.js";
+import { validateEnv } from "../env.js";
+import { dictPathFor } from "../dict-paths.js";
 
-const DEFAULT_BLOG_POSTS_DIR = "./Blog/source/_posts";
 const DEFAULT_QDRANT_URL = "http://localhost:6333";
 const COLLECTION = "blog";
-const DICT_PATH = "./src/extensions/lib/sparse-dict/blog.json";
 
 async function main() {
   validateEnv();
-  const blogDir = path.resolve(process.env.BLOG_POSTS_DIR ?? DEFAULT_BLOG_POSTS_DIR);
+  const blogPostsDir = process.env.BLOG_POSTS_DIR;
+  if (!blogPostsDir) {
+    throw new Error("BLOG_POSTS_DIR 未设置。请在 .env 中配置博客文章源目录。");
+  }
+  const blogDir = path.resolve(blogPostsDir);
   const qdrantUrl = process.env.QDRANT_URL ?? DEFAULT_QDRANT_URL;
-  const dictPath = path.resolve(DICT_PATH);
+  const dictPath = dictPathFor(COLLECTION);
 
   console.log(`[ingest-blog] blog dir      = ${blogDir}`);
   console.log(`[ingest-blog] qdrant url    = ${qdrantUrl}`);

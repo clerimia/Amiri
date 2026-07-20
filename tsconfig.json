@@ -11,16 +11,6 @@
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "lib": ["ES2022"],
-    "types": ["node"],
-    "baseUrl": ".",
-    "paths": {
-      "@lib/*": [".pi/extensions/lib/*"]
-    }
-  },
-  "include": [
-    "src/extensions/lib/**/*.ts",
-    "src/ingest/**/*.ts",
-    "tests/**/*.ts"
-  ],
-  "exclude": ["node_modules", "reference", "Blog", "src/extensions/search-rag.ts"]
+    "types": ["node"]
+  }
 }

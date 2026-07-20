@@ -14,7 +14,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
 import "dotenv/config";
-import { retrieve, type CollectionName } from "../../src/extensions/lib/rag-retrieve.js";
+import { retrieve, type CollectionName } from "../../lib/retriever/retrieve.js";
 
 interface Case {
   id: string;
